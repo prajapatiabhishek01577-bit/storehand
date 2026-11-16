@@ -14,7 +14,8 @@ FROM rust:1-bookworm AS voxl
 ARG WITH_VOXL=1
 ARG VOXL_VERSION=0.3.5
 RUN mkdir -p /out/bin && if [ "$WITH_VOXL" = "1" ]; then \
-      apt-get update -qq && apt-get install -y -qq --no-install-recommends clang pkg-config libx264-dev libyuv-dev libopus-dev >/dev/null && \
+      apt-get update -qq && apt-get install -y -qq --no-install-recommends clang pkg-config libx264-dev libyuv-dev libopus-dev esbuild >/dev/null && \
+      rustup component add rustfmt && \
       cargo install -q --locked --version "$VOXL_VERSION" voxl-server --no-default-features --root /out; \
     fi
 
