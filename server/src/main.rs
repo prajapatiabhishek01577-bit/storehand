@@ -6,6 +6,7 @@ mod cron;
 mod db;
 mod runner;
 mod screen;
+mod store;
 
 use axum::extract::{Path, Request, State};
 use axum::http::{header, StatusCode};
@@ -90,7 +91,7 @@ async fn main() {
 
     // First start: create the primary Bot.
     if app.db.bots().is_empty() {
-        let name = env("PRIMARY_BOT_NAME", "Assistant");
+        let name = env("PRIMARY_BOT_NAME", "Storehand");
         let bot = app.db.create_bot(&name, "#f5f5f5", "waddle", &app.cfg.default_harness, None, true);
         app.init_bot_files(&bot);
     }
@@ -108,12 +109,16 @@ async fn main() {
         .route("/routines/{id}", patch(update_routine).delete(delete_routine))
         .route("/bots/{id}/screen", get(screen_info))
         .route("/ask", post(ask))
-        .route("/handoff", post(handoff));
+        .route("/handoff", post(handoff))
+        .route("/approve", post(approve))
+        .route("/approvals", get(list_approvals))
+        .route("/onboarding", post(onboarding));
     let router = Router::new()
         .nest("/api", api)
         .fallback(get(web))
         .layer(middleware::from_fn_with_state(app.clone(), auth))
         .route("/healthz", get(|| async { Json(json!({ "ok": true })) }))
+        .layer(middleware::from_fn(cors))
         .with_state(app.clone());
 
     app.recover();
@@ -174,11 +179,19 @@ type Res<T = Json<Value>> = Result<T, ApiError>;
 
 // Auth: browser login with AUTH_PASSWORD (any username), or the Bots' token for `botctl`.
 
-async fn auth(State(app): State<AppState>, req: Request, next: Next) -> Response {
-    let h = req.headers().get(header::AUTHORIZATION).and_then(|v| v.to_str().ok()).unwrap_or("");
+/// Marks requests made with the Bots' token. Bots can't answer approval cards.
+#[derive(Clone)]
+struct BotCaller;
+
+async fn auth(State(app): State<AppState>, mut req: Request, next: Next) -> Response {
+    let h = req.headers().get(header::AUTHORIZATION).and_then(|v| v.to_str().ok()).unwrap_or("").to_string();
     let password = PASSWORD.get().unwrap();
+    let is_bot = h.strip_prefix("Bearer ").is_some_and(|t| same(t.as_bytes(), app.cfg.bot_token.as_bytes()));
+    if is_bot {
+        req.extensions_mut().insert(BotCaller);
+    }
     let ok = password.is_empty()
-        || h.strip_prefix("Bearer ").is_some_and(|t| same(t.as_bytes(), app.cfg.bot_token.as_bytes()))
+        || is_bot
         || h.strip_prefix("Basic ").and_then(base64_decode).is_some_and(|creds| {
             let pass = creds.splitn(2, |b| *b == b':').nth(1).unwrap_or_default();
             same(pass, password.as_bytes())
@@ -373,8 +386,16 @@ async fn list_messages(State(app): State<AppState>, Path(id): Path<String>) -> R
     Ok(Json(json!(app.db.messages(&id, 200))))
 }
 
-async fn send_message(State(app): State<AppState>, Path(id): Path<String>, Json(v): Json<Value>) -> Res<(StatusCode, Json<Value>)> {
+async fn send_message(
+    State(app): State<AppState>,
+    Path(id): Path<String>,
+    caller: Option<axum::Extension<BotCaller>>,
+    Json(v): Json<Value>,
+) -> Res<(StatusCode, Json<Value>)> {
     need_bot(&app, &id)?;
+    if caller.is_some() && v.get("answer").is_some_and(|a| !a.is_null()) {
+        return Err(ApiError(StatusCode::FORBIDDEN, "Only the owner can answer cards".into()));
+    }
     let text = v["text"].as_str().map(str::trim).filter(|t| !t.is_empty()).ok_or_else(|| bad("Text is required"))?;
     let text: String = text.chars().take(100_000).collect();
     // Answering a choice card: remember which option was picked.
@@ -442,6 +463,51 @@ async fn handoff(State(app): State<AppState>, Json(v): Json<Value>) -> Result<St
         Some(answer) => format!("The user answered: {answer}"),
         None => "The user hasn't answered yet. Stop here and tell them in one line what you need. You'll get their answer as a new message.".into(),
     })
+}
+
+// Storehand: onboarding and approvals
+
+async fn onboarding(State(app): State<AppState>, Json(v): Json<Value>) -> Res<(StatusCode, Json<Value>)> {
+    let profile: store::Profile = serde_json::from_value(v).map_err(|e| bad(format!("Bad profile: {e}")))?;
+    let out = store::onboard(&app, profile).map_err(bad)?;
+    Ok((StatusCode::CREATED, Json(out)))
+}
+
+async fn list_approvals(State(app): State<AppState>) -> Json<Value> {
+    Json(store::approvals(&app))
+}
+
+/// `botctl approve`: waits for the owner. Anything but "Approve" means no.
+async fn approve(State(app): State<AppState>, Json(v): Json<Value>) -> Result<String, ApiError> {
+    let bot = v["from"].as_str().and_then(|id| app.db.bot(id)).ok_or_else(|| bad("Unknown Bot (BOT_ID)"))?;
+    let text = v["text"].as_str().map(str::trim).filter(|t| !t.is_empty()).ok_or_else(|| bad("Say what needs approval"))?;
+    let text: String = text.chars().take(300).collect();
+    let wait = Duration::from_secs(9 * 60);
+    Ok(match app.approve(&bot, &text, wait).await {
+        Some(a) if a.trim().eq_ignore_ascii_case("approve") => "Approved. Go ahead with exactly what was approved.".into(),
+        Some(a) => format!("NOT approved (owner said: {a}). Do not do it. Tell the owner you stopped."),
+        None => "NOT approved yet. Do not do it. Stop here and tell the owner in one line what is waiting for approval. Their answer arrives as a new message.".into(),
+    })
+}
+
+/// CORS for the dashboard on Cloudflare Pages. Only the origins in ALLOWED_ORIGIN.
+async fn cors(req: Request, next: Next) -> Response {
+    let allowed = env("ALLOWED_ORIGIN", "");
+    let origin = req.headers().get(header::ORIGIN).and_then(|v| v.to_str().ok()).unwrap_or("").to_string();
+    let ok = !allowed.is_empty() && allowed.split(',').any(|a| a.trim() == origin);
+    let mut res = if ok && req.method() == axum::http::Method::OPTIONS {
+        StatusCode::NO_CONTENT.into_response()
+    } else {
+        next.run(req).await
+    };
+    if ok && let Ok(o) = origin.parse() {
+        let h = res.headers_mut();
+        h.insert(header::ACCESS_CONTROL_ALLOW_ORIGIN, o);
+        h.insert(header::ACCESS_CONTROL_ALLOW_HEADERS, header::HeaderValue::from_static("authorization, content-type"));
+        h.insert(header::ACCESS_CONTROL_ALLOW_METHODS, header::HeaderValue::from_static("GET, POST, PATCH, DELETE, OPTIONS"));
+        h.insert(header::VARY, header::HeaderValue::from_static("origin"));
+    }
+    res
 }
 
 // Routines

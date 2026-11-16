@@ -14,6 +14,7 @@ const HELP: &str = r#"botctl: manage your routines (scheduled tasks).
   botctl bots                                      List all Bots
   botctl ask "<Bot name or id>" "<message>"        Ask another Bot; prints its reply
   botctl handoff "<what you need>"                 Ask the user to take over your screen; waits for "Done"
+  botctl approve "<what and how much>"             Ask the owner to approve spending, an order, or a new supplier; waits
 
 Cron has 5 fields in the server's local time: minute hour day month weekday.
   "30 7 * * *"    every day at 07:30
@@ -22,7 +23,7 @@ Cron has 5 fields in the server's local time: minute hour day month weekday.
 When a routine fires, you get "<what to do>" as a message and your reply goes to the user's chat.
 Confirm the schedule with the user in plain words.
 
-`ask` and `handoff` can take minutes: run them with a long command timeout (10 minutes).
+`ask`, `handoff`, and `approve` can take minutes: run them with a long command timeout (10 minutes).
 If the other Bot takes longer, its reply arrives later as a new message."#;
 
 fn api(method: &str, path: &str, body: Option<String>) -> Result<String, String> {
@@ -88,6 +89,10 @@ fn run(args: &[String]) -> Result<String, String> {
         ["handoff", text] => {
             let body = format!("{{\"from\":{},\"text\":{}}}", json_str(&bot), json_str(text));
             api("POST", "/api/handoff", Some(body))
+        }
+        ["approve", text] => {
+            let body = format!("{{\"from\":{},\"text\":{}}}", json_str(&bot), json_str(text));
+            api("POST", "/api/approve", Some(body))
         }
         _ => Ok(HELP.into()),
     }

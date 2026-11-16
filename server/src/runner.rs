@@ -294,6 +294,17 @@ impl App {
     /// reaches the Bot later as a normal message.
     pub async fn handoff(&self, bot: &Bot, text: &str, wait: Duration) -> Option<String> {
         let q = json!({ "title": text, "options": ["Done", "I can't right now"], "handoff": true });
+        self.wait_card(bot, q, wait).await
+    }
+
+    /// The Bot wants to spend money, order, or message a new supplier. Posts an
+    /// Approve/Decline card and waits, like `handoff`.
+    pub async fn approve(&self, bot: &Bot, text: &str, wait: Duration) -> Option<String> {
+        let q = json!({ "title": text, "options": ["Approve", "Decline"], "handoff": true, "approval": true });
+        self.wait_card(bot, q, wait).await
+    }
+
+    async fn wait_card(&self, bot: &Bot, q: Value, wait: Duration) -> Option<String> {
         let m = self.db.add_message(&bot.id, "bot", "", Some(&q), false, None);
         self.db.update_bot(&bot.id, BotPatch { unread: Some(true), ..Default::default() });
         let (tx, rx) = oneshot::channel();
@@ -417,6 +428,7 @@ They talk to you in a chat app, like messaging a coworker. Finish work end to en
 - Reply like a teammate in chat: short, plain English. Markdown is fine.
 - Each separate text block you write is shown as its own chat bubble. Before long work, send a one-line heads-up.
 - Ask before anything you can't undo: sending messages, publishing, deleting, paying.
+- Approvals (hard rule): {approval}
 - To ask a multiple-choice question, end your reply with this block, and nothing after it:
 ```question
 {{"title": "Your question?", "options": ["First", "Second", "Third"]}}
@@ -429,6 +441,7 @@ They talk to you in a chat app, like messaging a coworker. Finish work end to en
 
 Current time: {now}."#,
             name = bot.name,
+            approval = crate::store::APPROVAL_RULE.replace("botctl", &self.cfg.bin_dir.join("botctl").display().to_string()),
             // Full path: some harnesses run commands in a login shell that resets PATH.
             botctl = self.cfg.bin_dir.join("botctl").display(),
             screen = if self.screens.is_some() { screen_prompt(&self.cfg.bin_dir.join("botctl").display().to_string()) } else { String::new() },
@@ -452,7 +465,11 @@ fn split_question(text: &str) -> (&str, Option<Value>) {
     let Ok(q) = serde_json::from_str::<Value>(body.trim()) else { return (text, None) };
     let (Some(title), Some(opts)) = (q["title"].as_str(), q["options"].as_array()) else { return (text, None) };
     let options: Vec<String> = opts.iter().take(6).map(|o| o.as_str().map(String::from).unwrap_or(o.to_string())).collect();
-    (&t[..start], Some(json!({ "title": title, "options": options })))
+    let mut card = json!({ "title": title, "options": options });
+    if q["approval"] == json!(true) {
+        card["approval"] = json!(true);
+    }
+    (&t[..start], Some(card))
 }
 
 fn tool_label(name: &str, detail: &str) -> String {

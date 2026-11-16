@@ -159,7 +159,7 @@ function renderMessage(m, prev) {
     const q = m.question;
     out += `<div class="msg-row bot"><div class="bubble question ${q.picked != null ? "answered" : ""}" data-id="${m.id}">
       <h4>${esc(q.title)}</h4>
-      ${q.handoff && q.picked == null ? `<button class="open-screen">Open screen</button>` : ""}
+      ${q.handoff && !q.approval && q.picked == null ? `<button class="open-screen">Open screen</button>` : ""}
       ${q.options.map((o, k) => `<button class="option ${q.picked === k ? "picked" : ""}" data-k="${k}">
         <span class="key">${"ABCDEF"[k]}</span>${esc(o)}</button>`).join("")}
     </div></div>`;
