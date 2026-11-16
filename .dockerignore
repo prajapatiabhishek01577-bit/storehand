@@ -1,0 +1,10 @@
+.git
+target
+data
+workspace
+.env
+.env.*
+deploy/customers/*.env
+web/site/node_modules
+docs
+grok-bot-internals

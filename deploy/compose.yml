@@ -1,0 +1,70 @@
+# Storehand: one container per customer. HARD CAP: 4 customers (slots c1..c4). Do not add slots.
+# Each slot has its own env file, DATA_DIR volume, WORKSPACE_DIR volume, 2 GB memory, one browser.
+#
+# Start a customer:   cp deploy/customers/example.env deploy/customers/c1.env   # fill in
+#                     docker compose -f deploy/compose.yml --profile c1 up -d
+# Ports bind to localhost; put Caddy/Cloudflare Tunnel in front.
+
+x-customer: &customer
+  image: storehand:latest
+  build:
+    context: ..
+    dockerfile: Dockerfile
+  restart: unless-stopped
+  init: true
+  mem_limit: 2g
+  memswap_limit: 2g
+  cpus: 1.0
+  pids_limit: 512
+  shm_size: 512m
+  user: "10001:10001"
+  security_opt:
+    - no-new-privileges:true
+  cap_drop: [ALL]
+  environment:
+    MAX_SCREENS: "1" # one browser at a time
+  healthcheck:
+    test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3000/healthz"]
+    interval: 30s
+    timeout: 5s
+    retries: 3
+
+services:
+  c1:
+    <<: *customer
+    profiles: [c1]
+    container_name: storehand-c1
+    env_file: [customers/c1.env]
+    ports: ["127.0.0.1:3101:3000"]
+    volumes: [c1-data:/data, c1-workspace:/workspace]
+  c2:
+    <<: *customer
+    profiles: [c2]
+    container_name: storehand-c2
+    env_file: [customers/c2.env]
+    ports: ["127.0.0.1:3102:3000"]
+    volumes: [c2-data:/data, c2-workspace:/workspace]
+  c3:
+    <<: *customer
+    profiles: [c3]
+    container_name: storehand-c3
+    env_file: [customers/c3.env]
+    ports: ["127.0.0.1:3103:3000"]
+    volumes: [c3-data:/data, c3-workspace:/workspace]
+  c4:
+    <<: *customer
+    profiles: [c4]
+    container_name: storehand-c4
+    env_file: [customers/c4.env]
+    ports: ["127.0.0.1:3104:3000"]
+    volumes: [c4-data:/data, c4-workspace:/workspace]
+
+volumes:
+  c1-data: {}
+  c1-workspace: {}
+  c2-data: {}
+  c2-workspace: {}
+  c3-data: {}
+  c3-workspace: {}
+  c4-data: {}
+  c4-workspace: {}

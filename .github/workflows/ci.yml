@@ -18,3 +18,21 @@ jobs:
           for i in $(seq 1 30); do curl -sf localhost:3999/healthz && break; sleep 1; done
           curl -sf localhost:3999/ | grep -qi storehand
           if [ -f $GITHUB_WORKSPACE/deploy/smoke.sh ]; then bash $GITHUB_WORKSPACE/deploy/smoke.sh http://localhost:3999; fi
+  docker:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+      - name: compose config
+        run: |
+          for n in 1 2 3 4; do cp deploy/customers/example.env deploy/customers/c$n.env; done
+          docker compose -f deploy/compose.yml --profile c1 --profile c2 --profile c3 --profile c4 config -q
+      - name: build arm64 image
+        run: docker build -t storehand:latest .
+      - name: run one customer
+        run: |
+          echo "AUTH_PASSWORD=ci-test" >> deploy/customers/c1.env
+          docker compose -f deploy/compose.yml --profile c1 up -d
+          for i in $(seq 1 30); do curl -sf localhost:3101/healthz && break; sleep 2; done
+          docker exec storehand-c1 id -u | grep -qx 10001
+          docker inspect storehand-c1 --format '{{.HostConfig.Memory}}' | grep -qx 2147483648
+          docker logs storehand-c1

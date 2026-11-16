@@ -44,3 +44,7 @@ test-results/
 .vscode/*
 !.vscode/extensions.json
 *.swp
+
+# Per-customer env files (secrets)
+deploy/customers/*.env
+!deploy/customers/example.env

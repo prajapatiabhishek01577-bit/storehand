@@ -183,7 +183,8 @@ pub fn bot_env(info: &Info, bot_id: &str, bot_dir: &Path) -> HashMap<String, Str
         ("AGENT_BROWSER_PROFILE".into(), profile.display().to_string()),
         ("AGENT_BROWSER_HEADED".into(), "1".into()),
         ("AGENT_BROWSER_NO_XVFB".into(), "1".into()),
-        ("AGENT_BROWSER_ARGS".into(), "--start-maximized".into()),
+        // Containers add flags like --no-sandbox through AGENT_BROWSER_EXTRA_ARGS.
+        ("AGENT_BROWSER_ARGS".into(), format!("--start-maximized {}", crate::env("AGENT_BROWSER_EXTRA_ARGS", "")).trim().to_string()),
         // Lets agent-desktop read GTK, Qt, and Chromium apps on this screen.
         ("QT_ACCESSIBILITY".into(), "1".into()),
         ("ACCESSIBILITY_ENABLED".into(), "1".into()),
