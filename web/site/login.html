@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#12805C"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css"><script src="config.js"></script><title>storehand: log in</title></head>
+<body data-page="login">
+<header class="top"><a class="wordmark" href="index.html">storehand</a></header>
+<main class="wrap" style="max-width:440px">
+  <div class="tabs" style="position:static"><button data-mode="login" class="on">Log in</button><button data-mode="signup">Sign up</button></div>
+  <form class="card" id="auth">
+    <h2 id="title">Welcome back</h2>
+    <div id="demo" class="notice hide small">Demo mode: Supabase keys aren't set, so this login only lives in this browser.</div>
+    <label for="email">Email</label><input id="email" type="email" autocomplete="email" required>
+    <label for="password">Password</label><input id="password" type="password" autocomplete="current-password" minlength="8" required>
+    <p id="err" class="notice hide"></p><p id="msg" class="ok hide"></p>
+    <button class="btn" style="width:100%;margin-top:16px" id="go">Log in</button>
+  </form>
+</main>
+<script type="module">
+import { signIn, signUp, configured, $, $$ } from "./lib.js";
+let mode = location.hash === "#signup" ? "signup" : "login";
+if (!configured) $("#demo").classList.remove("hide");
+function set(m) {
+  mode = m;
+  $$(".tabs button").forEach((b) => b.classList.toggle("on", b.dataset.mode === m));
+  $("#title").textContent = m === "signup" ? "Create your account" : "Welcome back";
+  $("#go").textContent = m === "signup" ? "Sign up" : "Log in";
+  $("#password").autocomplete = m === "signup" ? "new-password" : "current-password";
+}
+$$(".tabs button").forEach((b) => b.onclick = () => set(b.dataset.mode));
+set(mode);
+$("#auth").onsubmit = async (e) => {
+  e.preventDefault();
+  $("#err").classList.add("hide"); $("#go").disabled = true;
+  try {
+    const email = $("#email").value.trim(), pw = $("#password").value;
+    const r = mode === "signup" ? await signUp(email, pw) : await signIn(email, pw);
+    if (mode === "signup" && !r.demo && !r.session) {
+      $("#msg").textContent = "Check your email to confirm, then log in."; $("#msg").classList.remove("hide");
+    } else location.href = mode === "signup" ? "onboarding.html" : "dashboard.html";
+  } catch (err) { $("#err").textContent = err.message; $("#err").classList.remove("hide"); }
+  $("#go").disabled = false;
+};
+</script>
+</body></html>

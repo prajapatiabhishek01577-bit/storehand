@@ -1,0 +1,55 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#12805C">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css"><script src="config.js"></script>
+<title>storehand: set up your shop</title></head>
+<body data-page="onboarding">
+<header class="top"><a class="wordmark" href="index.html">storehand</a><a class="small" href="dashboard.html">Skip for now</a></header>
+<main class="wrap" style="max-width:560px">
+  <div class="steps" id="steps"></div>
+  <form id="wiz" novalidate>
+    <section class="card step">
+      <h2>Your shop</h2>
+      <label for="businessName">Business name</label><input id="businessName" required placeholder="Rosa's Bakery">
+      <label for="location">Location</label><input id="location" placeholder="City, area, or 'online only'">
+    </section>
+    <section class="card step">
+      <h2>What you sell</h2>
+      <label for="sells">What do you sell?</label><textarea id="sells" required placeholder="Sourdough, pastries, custom cakes"></textarea>
+      <label for="bestSellers">Best sellers <span class="muted small">(comma separated)</span></label><input id="bestSellers" placeholder="Sourdough loaf, Cinnamon rolls">
+      <label>Is your business seasonal?</label>
+      <div class="row">
+        <label class="card" style="margin:0;font-weight:500"><input type="radio" name="seasonality" value="year-round" checked style="width:auto"> Year-round</label>
+        <label class="card" style="margin:0;font-weight:500"><input type="radio" name="seasonality" value="seasonal" style="width:auto"> Seasonal</label>
+      </div>
+      <label for="seasonNotes">Busy seasons <span class="muted small">(optional)</span></label><input id="seasonNotes" placeholder="Holidays, summer markets">
+    </section>
+    <section class="card step">
+      <h2>Suppliers and current prices</h2>
+      <p class="muted small">Only your Inbox helper sees these.</p>
+      <div id="suppliers"></div>
+      <button type="button" class="btn small ghost" data-add="suppliers">+ Add item</button>
+    </section>
+    <section class="card step">
+      <h2>Negotiation limits</h2>
+      <p class="muted small">The most you'll pay per item. Never shown to suppliers. Your helper still asks you before any order.</p>
+      <div id="limits"></div>
+      <button type="button" class="btn small ghost" data-add="limits">+ Add limit</button>
+    </section>
+    <section class="card step">
+      <h2>Social accounts</h2>
+      <p class="muted small">Handles only. You connect logins later in the dashboard.</p>
+      <div id="socials"></div>
+      <button type="button" class="btn small ghost" data-add="socials">+ Add account</button>
+    </section>
+    <section class="card step">
+      <h2>All set?</h2>
+      <div id="review" class="small"></div>
+      <p id="err" class="notice hide"></p><p id="ok" class="ok hide"></p>
+    </section>
+    <div class="row" style="margin-top:12px"><button type="button" class="btn ghost" id="back">Back</button><button class="btn" id="next">Next</button></div>
+  </form>
+</main>
+<script type="module" src="onboarding.js"></script>
+</body></html>

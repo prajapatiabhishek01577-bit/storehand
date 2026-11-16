@@ -1,0 +1,70 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#12805C">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css"><script src="config.js"></script>
+<title>storehand: dashboard</title></head>
+<body data-page="dashboard">
+<header class="top"><a class="wordmark" href="dashboard.html">storehand</a><button class="btn small ghost" id="logout">Log out</button></header>
+<nav class="tabs" aria-label="Dashboard">
+  <button data-tab="bots">Helpers</button>
+  <button data-tab="chat">Chat</button>
+  <button data-tab="approvals">Approvals <span class="pill warn hide" id="pending-count"></span></button>
+  <button data-tab="activity">Activity</button>
+  <button data-tab="accounts">Accounts</button>
+  <button data-tab="models">Models</button>
+  <button data-tab="settings">Settings</button>
+</nav>
+<main class="wrap">
+  <p id="err" class="notice hide"></p>
+
+  <section data-panel="bots">
+    <div id="bots" class="grid two"></div>
+    <p class="muted small" id="no-bots"></p>
+  </section>
+
+  <section data-panel="chat" class="hide">
+    <label for="chat-bot" class="small">Talking to</label>
+    <select id="chat-bot"></select>
+    <div class="card"><div class="chat" id="messages" aria-live="polite"></div></div>
+    <form id="send" class="row"><input id="text" placeholder="Message your helper" autocomplete="off"><button class="btn">Send</button></form>
+  </section>
+
+  <section data-panel="approvals" class="hide">
+    <p class="muted small">Helpers ask here before spending money, placing an order, or messaging a new supplier.</p>
+    <div id="approvals" class="card list"></div>
+  </section>
+
+  <section data-panel="activity" class="hide">
+    <div id="activity" class="card list"></div>
+  </section>
+
+  <section data-panel="accounts" class="hide">
+    <p class="muted small">Connect the accounts your helpers work with. Logins stay on your own server.</p>
+    <div class="card list" id="accounts"></div>
+  </section>
+
+  <section data-panel="models" class="hide">
+    <p class="muted small">Pick which AI model each helper uses. Helpers only get your shop basics, never your contact details.</p>
+    <div id="models" class="card list"></div>
+  </section>
+
+  <section data-panel="settings" class="hide">
+    <form class="card" id="server-form">
+      <h3>Your Storehand server</h3>
+      <p class="muted small">Your shop runs on its own private server. Paste its address and password from your welcome email.</p>
+      <label for="server-url">Server address</label><input id="server-url" type="url" placeholder="https://yourshop.example.com" required>
+      <label for="server-pass">Server password</label><input id="server-pass" type="password" autocomplete="off">
+      <div class="row" style="margin-top:14px"><button class="btn">Save and connect</button></div>
+      <p id="server-msg" class="small"></p>
+    </form>
+    <div class="card">
+      <h3>Shop profile</h3>
+      <p class="muted small">Change what your helpers know about your shop.</p>
+      <a class="btn ghost" href="onboarding.html">Edit shop profile</a>
+      <button class="btn hide" id="send-profile">Send saved profile to server</button>
+    </div>
+  </section>
+</main>
+<script type="module" src="dashboard.js"></script>
+</body></html>
