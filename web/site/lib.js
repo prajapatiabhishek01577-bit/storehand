@@ -1,6 +1,6 @@
-// Shared: Supabase auth, the customer's Storehand server, small DOM helpers.
+// Shared: Supabase auth, the customer's Feral AI server, small DOM helpers.
 // Auth runs in demo mode (local only) until SUPABASE_URL / SUPABASE_ANON_KEY are set at build.
-const CFG = window.STOREHAND || {};
+const CFG = window.FERALAI || {};
 export const configured = !!(CFG.SUPABASE_URL && CFG.SUPABASE_ANON_KEY && !CFG.SUPABASE_URL.includes("<"));
 let sb = null;
 async function client() {
@@ -44,7 +44,7 @@ export async function requireUser() {
   return u;
 }
 
-// The customer's own Storehand server (one container per shop).
+// The customer's own Feral AI server (one container per shop).
 // Until provisioning links it to the account, the owner pastes its URL and password once.
 export const server = {
   get url() { return (localStorage.getItem("sh_server") || "").replace(/\/+$/, ""); },
@@ -53,7 +53,7 @@ export const server = {
   get ready() { return !!this.url; },
 };
 export async function api(method, path, body) {
-  if (!server.ready) throw new Error("Connect your Storehand server first (Settings).");
+  if (!server.ready) throw new Error("Connect your Feral AI server first (Settings).");
   const headers = { "content-type": "application/json" };
   if (server.pass) headers.authorization = "Basic " + btoa("owner:" + server.pass);
   const res = await fetch(server.url + path, { method, headers, body: body ? JSON.stringify(body) : undefined });

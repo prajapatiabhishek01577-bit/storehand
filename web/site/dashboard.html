@@ -1,11 +1,9 @@
 <!doctype html><html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#12805C">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#F5F4F1" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#1A1A18" media="(prefers-color-scheme: dark)"><link rel="icon" href="brand/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="brand/favicon-32.png"><link rel="apple-touch-icon" href="brand/apple-touch-icon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css"><script src="config.js"></script>
-<title>storehand: dashboard</title></head>
+<title>Feral AI: dashboard</title></head>
 <body data-page="dashboard">
-<header class="top"><a class="wordmark" href="dashboard.html">storehand</a><button class="btn small ghost" id="logout">Log out</button></header>
+<header class="top"><a class="wordmark" href="dashboard.html"><picture><source srcset="brand/app-icon.png" media="(prefers-color-scheme: dark)"><img class="mark" src="brand/mark-128.png" alt="" width="28" height="28"></picture>feral</a><button class="btn small ghost" id="logout">Log out</button></header>
 <nav class="tabs" aria-label="Dashboard">
   <button data-tab="bots">Helpers</button>
   <button data-tab="chat">Chat</button>
@@ -51,7 +49,7 @@
 
   <section data-panel="settings" class="hide">
     <form class="card" id="server-form">
-      <h3>Your Storehand server</h3>
+      <h3>Your Feral AI server</h3>
       <p class="muted small">Your shop runs on its own private server. Paste its address and password from your welcome email.</p>
       <label for="server-url">Server address</label><input id="server-url" type="url" placeholder="https://yourshop.example.com" required>
       <label for="server-pass">Server password</label><input id="server-pass" type="password" autocomplete="off">

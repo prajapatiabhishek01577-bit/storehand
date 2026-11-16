@@ -91,7 +91,7 @@ async fn main() {
 
     // First start: create the primary Bot.
     if app.db.bots().is_empty() {
-        let name = env("PRIMARY_BOT_NAME", "Storehand");
+        let name = env("PRIMARY_BOT_NAME", "Feral");
         let bot = app.db.create_bot(&name, "#f5f5f5", "waddle", &app.cfg.default_harness, None, true);
         app.init_bot_files(&bot);
     }
@@ -465,7 +465,7 @@ async fn handoff(State(app): State<AppState>, Json(v): Json<Value>) -> Result<St
     })
 }
 
-// Storehand: onboarding and approvals
+// Feral AI: onboarding and approvals
 
 async fn onboarding(State(app): State<AppState>, Json(v): Json<Value>) -> Res<(StatusCode, Json<Value>)> {
     let profile: store::Profile = serde_json::from_value(v).map_err(|e| bad(format!("Bad profile: {e}")))?;

@@ -13,3 +13,12 @@
 11. **Re-running onboarding rewrites each helper's Job/Rules** (Work log is kept). Owner edits to those sections are lost.
 12. **4-customer cap** is enforced only by the compose file having 4 slots; signup does not check it.
 13. `docs/` and `grok-bot-internals/` still describe upstream SuperBot internals.
+
+## Run 2 (Feral AI rebrand, not blockers)
+
+14. **GitHub repo is still named `storehand`.** Rename the repo (and local folder) when convenient; links in docs still point to it.
+15. **Logo crops sit on the logo's cream background** (#F5F0EA-ish), a touch warmer than the site's #F5F4F1. No transparent version exists; the header mark is clipped to a circle. Ask the designer for an SVG/transparent export.
+16. **Dark mode header uses the app-icon crop** (dark rounded square) since the light-mode mark is black on cream.
+17. **In-container chat app (`web/index.html`, `web/styles.css`)** got the name change only, not the new palette/font.
+18. **Docker user renamed** `storehand` -> `feralai` (same uid 10001). Existing volumes are fine (owned by uid), but any host scripts using `/home/storehand` must change.
+19. **Inter loads from Google Fonts**; self-host later if privacy/CSP requires it.

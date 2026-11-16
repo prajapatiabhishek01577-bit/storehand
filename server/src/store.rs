@@ -1,4 +1,4 @@
-//! Storehand: shop onboarding and owner approvals.
+//! Feral AI: shop onboarding and owner approvals.
 //!
 //! Onboarding turns a business profile into USER.md plus three Bots (Social, Inbox, SEO),
 //! each with its job, rules, and routines. Data is split by need: every Bot sees only the
@@ -153,7 +153,7 @@ impl Profile {
     }
 }
 
-/// The rule every Storehand Bot follows. Also in the system prompt.
+/// The rule every Feral AI Bot follows. Also in the system prompt.
 pub const APPROVAL_RULE: &str = "Before you spend money, place or change an order, or message a supplier you have not messaged before, run `botctl approve \"<what and how much>\"` and wait for the owner's answer. Only go ahead if it prints Approved. If it does not, stop and do nothing.";
 
 struct BotSpec {

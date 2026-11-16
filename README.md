@@ -1,8 +1,8 @@
-# storehand
+# Feral AI
 
-AI staff for small shops. Storehand gives a shop owner three Bots (Social, Inbox, SEO) that run on their own computer, remember the business, and always ask before spending money, placing an order, or messaging a new supplier.
+**your business, running itself.** AI staff for small shops at [feralai.si](https://feralai.si). Feral AI gives a shop owner three Bots (Social, Inbox, SEO) that run on their own computer, remember the business, and always ask before spending money, placing an order, or messaging a new supplier.
 
-Storehand is a fork of [SuperBot](https://github.com/davidondrej/superbot) (MIT). See `LICENSE`.
+Feral AI is a fork of [SuperBot](https://github.com/davidondrej/superbot) (MIT). See `LICENSE`.
 
 ## Layout
 

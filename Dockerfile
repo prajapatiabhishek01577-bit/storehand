@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
-# Storehand: one container per customer. Built for linux/arm64 (Oracle Ampere) and amd64.
-# Build: docker build -t storehand:latest .
+# Feral AI: one container per customer. Built for linux/arm64 (Oracle Ampere) and amd64.
+# Build: docker build -t feralai:latest .
 
 FROM rust:1-bookworm AS build
 WORKDIR /src
@@ -37,17 +37,17 @@ COPY --from=build /src/target/release/botd /src/target/release/botctl /usr/local
 COPY --from=voxl /out/bin/ /usr/local/bin/
 
 # Non-root user. DATA_DIR and WORKSPACE_DIR are per-customer volumes.
-RUN useradd --create-home --uid 10001 --shell /bin/bash storehand \
-    && mkdir -p /data /workspace && chown storehand:storehand /data /workspace
-USER storehand
-WORKDIR /home/storehand
+RUN useradd --create-home --uid 10001 --shell /bin/bash feralai \
+    && mkdir -p /data /workspace && chown feralai:feralai /data /workspace
+USER feralai
+WORKDIR /home/feralai
 
 ENV HOST=0.0.0.0 \
     PORT=3000 \
     DATA_DIR=/data \
     WORKSPACE_DIR=/workspace \
     DEFAULT_HARNESS=claude \
-    PRIMARY_BOT_NAME=Storehand \
+    PRIMARY_BOT_NAME=Feral \
     SCREENS=on \
     MAX_SCREENS=1 \
     SCREEN_IDLE_MINUTES=5 \

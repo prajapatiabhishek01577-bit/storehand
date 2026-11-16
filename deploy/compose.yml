@@ -1,4 +1,4 @@
-# Storehand: one container per customer. HARD CAP: 4 customers (slots c1..c4). Do not add slots.
+# Feral AI: one container per customer. HARD CAP: 4 customers (slots c1..c4). Do not add slots.
 # Each slot has its own env file, DATA_DIR volume, WORKSPACE_DIR volume, 2 GB memory, one browser.
 #
 # Start a customer:   cp deploy/customers/example.env deploy/customers/c1.env   # fill in
@@ -6,7 +6,7 @@
 # Ports bind to localhost; put Caddy/Cloudflare Tunnel in front.
 
 x-customer: &customer
-  image: storehand:latest
+  image: feralai:latest
   build:
     context: ..
     dockerfile: Dockerfile
@@ -33,28 +33,28 @@ services:
   c1:
     <<: *customer
     profiles: [c1]
-    container_name: storehand-c1
+    container_name: feralai-c1
     env_file: [customers/c1.env]
     ports: ["127.0.0.1:3101:3000"]
     volumes: [c1-data:/data, c1-workspace:/workspace]
   c2:
     <<: *customer
     profiles: [c2]
-    container_name: storehand-c2
+    container_name: feralai-c2
     env_file: [customers/c2.env]
     ports: ["127.0.0.1:3102:3000"]
     volumes: [c2-data:/data, c2-workspace:/workspace]
   c3:
     <<: *customer
     profiles: [c3]
-    container_name: storehand-c3
+    container_name: feralai-c3
     env_file: [customers/c3.env]
     ports: ["127.0.0.1:3103:3000"]
     volumes: [c3-data:/data, c3-workspace:/workspace]
   c4:
     <<: *customer
     profiles: [c4]
-    container_name: storehand-c4
+    container_name: feralai-c4
     env_file: [customers/c4.env]
     ports: ["127.0.0.1:3104:3000"]
     volumes: [c4-data:/data, c4-workspace:/workspace]
