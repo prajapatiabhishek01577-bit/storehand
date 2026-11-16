@@ -1,0 +1,20 @@
+name: ci
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --release
+      - run: cargo test --release
+      - name: smoke
+        run: |
+          mkdir -p /tmp/sh && cd /tmp/sh
+          DATA_DIR=/tmp/sh/data WORKSPACE_DIR=/tmp/sh/ws SCREENS=off PORT=3999 $GITHUB_WORKSPACE/target/release/botd &
+          for i in $(seq 1 30); do curl -sf localhost:3999/healthz && break; sleep 1; done
+          curl -sf localhost:3999/ | grep -qi storehand
+          if [ -f $GITHUB_WORKSPACE/deploy/smoke.sh ]; then bash $GITHUB_WORKSPACE/deploy/smoke.sh http://localhost:3999; fi
