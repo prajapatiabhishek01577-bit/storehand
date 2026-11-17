@@ -332,7 +332,7 @@ Not set yet. Ask the user.
 ";
         assert_eq!(pick_job_rules(&job_rules(default), None, fresh), fresh);
         // Unedited since last onboarding: refresh.
-        let gen = "# X
+        let generated = "# X
 
 ## Job
 
@@ -353,7 +353,7 @@ old job
 ## Rules
 
 - rule";
-        assert_eq!(pick_job_rules(&job_rules(gen), Some(last), fresh), fresh);
+        assert_eq!(pick_job_rules(&job_rules(generated), Some(last), fresh), fresh);
         // Owner edited Job/Rules: keep their text.
         let edited = "# X
 
