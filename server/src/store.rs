@@ -237,9 +237,14 @@ pub fn onboard(app: &Arc<App>, mut p: Profile) -> Result<Value, String> {
             _ => String::new(),
         };
         let mem_path = app.bot_dir(&bot.id).join("MEMORY.md");
-        let log = work_log(&std::fs::read_to_string(&mem_path).unwrap_or_default());
-        let mem = format!("# {}\n\n## Job\n\n{}\n\n## Rules\n\n- {}\n\n{}\n## Work log\n\n{}\n", bot.name, spec.job, APPROVAL_RULE, extra, log);
+        let last_path = app.bot_dir(&bot.id).join(".onboard-last.md");
+        let old = std::fs::read_to_string(&mem_path).unwrap_or_default();
+        let fresh = format!("## Job\n\n{}\n\n## Rules\n\n- {}\n\n{}", spec.job, APPROVAL_RULE, extra).trim().to_string();
+        let last = std::fs::read_to_string(&last_path).ok();
+        let body = pick_job_rules(&job_rules(&old), last.as_deref(), &fresh);
+        let mem = format!("# {}\n\n{}\n\n## Work log\n\n{}\n", bot.name, body, work_log(&old));
         std::fs::write(&mem_path, mem).map_err(|e| e.to_string())?;
+        std::fs::write(&last_path, &fresh).map_err(|e| e.to_string())?;
 
         let old = app.db.routines(Some(&bot.id));
         let mut routines = Vec::new();
