@@ -8,3 +8,5 @@ Static, no framework. Pages settings:
 
 Pages: `index.html` landing, `login.html` signup/login, `onboarding.html` wizard, `dashboard.html` (helpers, chat, approvals, activity, accounts, models, settings).
 The dashboard talks to the shop's own Feral AI server (set its URL + password in Settings). That server must list this site's origin in `ALLOWED_ORIGIN`.
+
+Customer cap: apply `supabase/migrations/` to the Supabase project (SQL editor or `supabase db push`). A trigger on `auth.users` rejects the 5th signup; CI tests it in `supabase/tests/customer_cap.sh`.

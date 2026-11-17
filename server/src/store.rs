@@ -202,6 +202,23 @@ fn work_log(old: &str) -> String {
     old.split_once("## Work log").map(|(_, rest)| rest.trim().to_string()).unwrap_or_default()
 }
 
+/// The Job + Rules part of a memory file: from "## Job" up to "## Work log".
+fn job_rules(mem: &str) -> String {
+    let Some((_, rest)) = mem.split_once("## Job") else { return String::new() };
+    format!("## Job{}", rest.split_once("## Work log").map_or(rest, |(a, _)| a)).trim().to_string()
+}
+
+/// Picks the Job + Rules to write. Keeps the current text if the owner edited it since the
+/// last onboarding (`last` = what onboarding wrote then); otherwise uses the fresh text.
+fn pick_job_rules(current: &str, last: Option<&str>, fresh: &str) -> String {
+    let unset = current.is_empty() || current.contains("Not set yet. Ask the user.");
+    match last {
+        _ if unset => fresh.to_string(),
+        Some(l) if l.trim() == current => fresh.to_string(),
+        _ => current.to_string(),
+    }
+}
+
 pub fn onboard(app: &Arc<App>, mut p: Profile) -> Result<Value, String> {
     p.validate()?;
     std::fs::write(app.cfg.data_dir.join("USER.md"), p.user_md(&app.cfg.user_name)).map_err(|e| e.to_string())?;
@@ -291,6 +308,72 @@ mod tests {
                 crate::cron::parse(cron).unwrap();
             }
         }
+    }
+
+    #[test]
+    fn owner_edits_survive_rerun() {
+        let fresh = "## Job
+
+new job
+
+## Rules
+
+- rule";
+        // First run over the default file: use fresh text.
+        let default = "# X
+
+## Job
+
+Not set yet. Ask the user.
+
+## Rules
+
+## Work log
+";
+        assert_eq!(pick_job_rules(&job_rules(default), None, fresh), fresh);
+        // Unedited since last onboarding: refresh.
+        let gen = "# X
+
+## Job
+
+old job
+
+## Rules
+
+- rule
+
+## Work log
+
+- did a thing
+";
+        let last = "## Job
+
+old job
+
+## Rules
+
+- rule";
+        assert_eq!(pick_job_rules(&job_rules(gen), Some(last), fresh), fresh);
+        // Owner edited Job/Rules: keep their text.
+        let edited = "# X
+
+## Job
+
+old job, but only weekdays
+
+## Rules
+
+- rule
+- no emojis
+
+## Work log
+
+- did a thing
+";
+        let kept = pick_job_rules(&job_rules(edited), Some(last), fresh);
+        assert!(kept.contains("only weekdays") && kept.contains("no emojis") && !kept.contains("Work log"));
+        // Edited file with no record of the last run: keep it (safe default).
+        assert!(pick_job_rules(&job_rules(edited), None, fresh).contains("no emojis"));
     }
 
     #[test]

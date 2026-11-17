@@ -16,6 +16,8 @@ export async function signUp(email, password) {
   const c = await client();
   if (!c) { localStorage.setItem("sh_demo_user", email); return { demo: true }; }
   const { data, error } = await c.auth.signUp({ email, password });
+  // The DB caps customers at 4 (supabase/migrations); Supabase reports that as a generic DB error.
+  if (error && /database error saving new user/i.test(error.message)) throw new Error("Feral AI is full right now (4 shops). Please try again later.");
   if (error) throw error;
   return data;
 }

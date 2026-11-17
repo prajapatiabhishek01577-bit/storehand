@@ -18,6 +18,18 @@ jobs:
           for i in $(seq 1 30); do curl -sf localhost:3999/healthz && break; sleep 1; done
           curl -sf localhost:3999/ | grep -qi feral
           if [ -f $GITHUB_WORKSPACE/deploy/smoke.sh ]; then bash $GITHUB_WORKSPACE/deploy/smoke.sh http://localhost:3999; fi
+  supabase:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_PASSWORD: ci }
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 2s --health-retries 15
+    env: { PGHOST: localhost, PGUSER: postgres, PGPASSWORD: ci, PGDATABASE: postgres }
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash supabase/tests/customer_cap.sh
   docker:
     runs-on: ubuntu-24.04-arm
     steps:

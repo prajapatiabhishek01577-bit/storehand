@@ -10,8 +10,8 @@
 8. **Docker image is large** (Chromium + Node + harness CLI). agent-desktop is not installed (no arm64 build); Bots get the browser only.
 9. **Chromium runs with `--no-sandbox`** inside the container (container is the boundary: non-root, cap_drop ALL, no-new-privileges).
 10. **Harness login inside the container** (Claude Code auth) is not automated; set `ANTHROPIC_API_KEY` in the customer env file.
-11. **Re-running onboarding rewrites each helper's Job/Rules** (Work log is kept). Owner edits to those sections are lost.
-12. **4-customer cap** is enforced only by the compose file having 4 slots; signup does not check it.
+11. **FIXED (run 4).** ~~**Re-running onboarding rewrites each helper's Job/Rules**~~ Onboarding saves what it wrote in `.onboard-last.md`; on re-run it only refreshes Job/Rules if the owner hasn't changed them since.
+12. **FIXED (run 4).** ~~**4-customer cap** not checked at signup~~ A trigger on `auth.users` (`supabase/migrations/`) rejects the 5th signup. Must be applied to the Supabase project.
 13. `docs/` and `grok-bot-internals/` still describe upstream SuperBot internals.
 
 ## Run 2 (Feral AI rebrand, not blockers)
@@ -20,5 +20,5 @@
 15. **Logo crops sit on the logo's cream background** (#F5F0EA-ish), a touch warmer than the site's #F5F4F1. No transparent version exists; the header mark is clipped to a circle. Ask the designer for an SVG/transparent export.
 16. **Dark mode header uses the app-icon crop** (dark rounded square) since the light-mode mark is black on cream.
 17. **FIXED (run 3).** ~~**In-container chat app (`web/index.html`, `web/styles.css`)** got the name change only, not the new palette/font.~~
-18. **Docker user renamed** `storehand` -> `feralai` (same uid 10001). Existing volumes are fine (owned by uid), but any host scripts using `/home/storehand` must change.
+18. **FIXED (run 4).** ~~**Docker user renamed** `storehand` -> `feralai`~~ No repo scripts or docs reference `/home/storehand` (checked); private host scripts outside the repo still need a manual check.
 19. **FIXED (run 3).** ~~**Inter loads from Google Fonts**~~ Inter is self-hosted (`web/site/fonts/inter.woff2`, OFL); botd serves it at `/fonts/inter.woff2`. No CSP exists yet.
