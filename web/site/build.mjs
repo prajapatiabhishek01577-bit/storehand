@@ -4,7 +4,7 @@ import { cpSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 const out = new URL("./dist/", import.meta.url);
 mkdirSync(out, { recursive: true });
 for (const f of readdirSync(new URL("./", import.meta.url))) {
-  if (f === "brand") cpSync(new URL("brand/", import.meta.url), new URL("brand/", out), { recursive: true });
+  if (f === "brand" || f === "fonts") cpSync(new URL(f + "/", import.meta.url), new URL(f + "/", out), { recursive: true });
   else if ((/\.(html|css|js)$/.test(f) || f === "_headers") && !["build.mjs", "config.example.js"].includes(f)) cpSync(new URL(f, import.meta.url), new URL(f, out));
 }
 const cfg = { SUPABASE_URL: process.env.SUPABASE_URL || "", SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY || "" };

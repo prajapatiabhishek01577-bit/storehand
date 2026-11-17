@@ -226,6 +226,10 @@ fn base64_decode(s: &str) -> Option<Vec<u8>> {
 
 async fn web(uri: axum::http::Uri) -> Response {
     let path = uri.path();
+    if path == "/fonts/inter.woff2" {
+        let font: &[u8] = include_bytes!("../../web/site/fonts/inter.woff2");
+        return ([(header::CONTENT_TYPE, "font/woff2"), (header::CACHE_CONTROL, "max-age=31536000, immutable")], font).into_response();
+    }
     let file = match path {
         "/" | "/index.html" => "index.html",
         "/app.js" => "app.js",

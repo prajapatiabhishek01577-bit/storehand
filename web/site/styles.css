@@ -1,3 +1,4 @@
+@font-face{font-family:Inter;font-style:normal;font-weight:100 900;font-display:swap;src:url(fonts/inter.woff2) format("woff2")}
 :root{--accent:#2F5D4F;--accent-2:#244a3f;--on-accent:#fff;--ink:#1C1C1A;--bg:#F5F4F1;--card:#FBFAF8;--field:#fff;--muted:#5E5D58;--line:#DAD8D2;--soft:#EAE8E3;--warn:#8a5a1c;--warn-bg:#F1EADF;--radius:12px;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Inter,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg)}
 @media(prefers-color-scheme:dark){:root{--accent:#8FBFAB;--accent-2:#a5cdbc;--on-accent:#1A1A18;--ink:#EDECE8;--bg:#1A1A18;--card:#222220;--field:#262624;--muted:#A3A29C;--line:#3A3936;--soft:#2A2A27;--warn:#d9b98a;--warn-bg:#2e2a22}}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--bg);line-height:1.45}
